@@ -32,9 +32,8 @@ public class Main {
             System.out.println("Give me some integer to look for ya':");
             Scanner in = new Scanner(System.in);
             int num = in.nextInt();
-            Pair<Integer, Integer> pair = search.IndexOf(array, num);
-            System.out.println("Index of number:" + pair.getKey());
-            System.out.println("Comparisons of number:" + pair.getValue());
+            int index = search.IndexOfRecursive(array, num, true);
+            System.out.println("Index of number:" + index);
         }
     }
 }
