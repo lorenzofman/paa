@@ -4,32 +4,32 @@ using System.Text;
 
 namespace Graph
 {
-    public class Node<T> where T : IComparable
+    public class Node<T>
     {
         public T data;
-        public List<Node<T>> inNeighboors = new List<Node<T>>();
-        public List<Node<T>> outNeighboors = new List<Node<T>>();
+        public HashSet<Node<T>> inNeighbors = new HashSet<Node<T>>();
+        public HashSet<Node<T>> outNeighbors = new HashSet<Node<T>>();
 
         public Node(T data)
         {
             this.data = data;
         }
 
-        public void AddNeighboor(params T[] neighboors)
+        public void AddNeighbor(params T[] Neighbors)
         {
-            foreach (T neighboor in neighboors)
+            foreach (T Neighbor in Neighbors)
             {
-                Node<T> neighboorNode = new Node<T>(neighboor);
-                AddNeighboor(neighboorNode);
+                Node<T> NeighborNode = new Node<T>(Neighbor);
+                AddNeighbor(NeighborNode);
             }
         }
 
-        public void AddNeighboor(params Node<T>[] neighboorNodes)
+        public void AddNeighbor(params Node<T>[] NeighborNodes)
         {
-            foreach (Node<T> neighboorNode in neighboorNodes)
+            foreach (Node<T> NeighborNode in NeighborNodes)
             {
-                this.outNeighboors.Add(neighboorNode);
-                neighboorNode.inNeighboors.Add(this);
+                this.outNeighbors.Add(NeighborNode);
+                NeighborNode.inNeighbors.Add(this);
             }
         }
 

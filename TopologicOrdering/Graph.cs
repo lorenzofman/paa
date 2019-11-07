@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Graph
 {
-    public class Graph<T> where T : IComparable
+    public class Graph<T>
     {
         public Node<T> firstNode;
 
@@ -16,42 +16,69 @@ namespace Graph
         public List<Node<T>> TopologicalReordering()
         {
             List<Node<T>> orderedNodes = new List<Node<T>>();
+            
+            if(HasCycles())
+            {
+                Console.WriteLine("Has cycles");
+                return orderedNodes;
+            }
+
             Queue<Node<T>> nodes = new Queue<Node<T>>(FetchRootNodes());
+            
             while(nodes.Count > 0)
             {
                 Node<T> node = nodes.Dequeue();
-                foreach(Node<T> outNeighboor in node.outNeighboors)
+                foreach(Node<T> outNeighbor in node.outNeighbors)
                 {
-                    outNeighboor.inNeighboors.Remove(node);
-                    if(outNeighboor.inNeighboors.Count == 0)
+                    outNeighbor.inNeighbors.Remove(node);
+                    if(outNeighbor.inNeighbors.Count == 0)
                     {
-                        nodes.Enqueue(outNeighboor);
+                        nodes.Enqueue(outNeighbor);
                     }
                 }
                 orderedNodes.Add(node);
             }
             return orderedNodes;
         }
-
         private List<Node<T>> FetchRootNodes()
         {
             List<Node<T>> rootNodes = new List<Node<T>>();
-            GraphForeach(firstNode, (node) =>
+            ForeachNode(firstNode, false, (node) =>
             {
-                if(node.inNeighboors.Count == 0)
+                if (node.inNeighbors.Count == 0)
                 {
                     rootNodes.Add(node);
                 }
-            }, false);
+            });
             return rootNodes;
         }
 
-
-        private void GraphForeach(Node<T> currentNode, Action<Node<T>> action, bool direct)
+        private bool HasCycles()
         {
-            GraphForeach(currentNode, new HashSet<Node<T>>(), action, direct);
+            List<Node<T>> allNodes = new List<Node<T>>();
+            ForeachNode(firstNode, true, node =>
+            {
+                allNodes.Add(node);
+            });
+            foreach(Node<T> node in allNodes)
+            {
+                foreach(Node<T> outNeighbor in node.outNeighbors)
+                {
+                    if(outNeighbor.outNeighbors.Contains(node))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
-        private void GraphForeach(Node<T> currentNode, HashSet<Node<T>> visitedNodes, Action<Node<T>> action, bool direct)
+
+
+        private void ForeachNode(Node<T> currentNode, bool direct, Action<Node<T>> action)
+        {
+            ForeachNode(currentNode, new HashSet<Node<T>>(), direct, action);
+        }
+        private void ForeachNode(Node<T> currentNode, HashSet<Node<T>> visitedNodes, bool direct, Action<Node<T>> action)
         {
             if (visitedNodes.Contains(currentNode))
             {
@@ -62,17 +89,17 @@ namespace Graph
 
             visitedNodes.Add(currentNode);
 
-            foreach (Node<T> neighboor in currentNode.outNeighboors)
+            foreach (Node<T> Neighbor in currentNode.outNeighbors)
             {
-                GraphForeach(neighboor, visitedNodes, action, direct);
+                ForeachNode(Neighbor, visitedNodes, direct, action);
             }
             if(direct)
             {
                 return;
             }
-            foreach (Node<T> neighboor in currentNode.inNeighboors)
+            foreach (Node<T> Neighbor in currentNode.inNeighbors)
             {
-                GraphForeach(neighboor, visitedNodes, action, direct);
+                ForeachNode(Neighbor, visitedNodes, direct, action);
             }
         }
     }
