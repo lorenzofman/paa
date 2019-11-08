@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Graph
 {
-    public class Graph<T> where T : IComparable
+    public class Graph<T>
     {
         public Node<T> firstNode;
 
@@ -12,38 +12,29 @@ namespace Graph
         {
             this.firstNode = node;
         }
-        
-        public List<Node<T>> FetchRootNodes()
-        {
-            List<Node<T>> rootNodes = new List<Node<T>>();
-            GraphForeach(firstNode, (node) =>
-            {
-                if(node.inNeighboors.Count == 0)
-                {
-                    rootNodes.Add(node);
-                }
-            }, false);
-            return rootNodes;
-        }
 
-        private void GraphForeach(Node<T> currentNode, Action<Node<T>> action, bool direct)
+        public void Foreach(Action<Node<T>, Node<T>> action, bool direct)
         {
-            GraphForeach(currentNode, new HashSet<Node<T>>(), action, direct);
+            Foreach(this.firstNode, direct, action);
         }
-        private void GraphForeach(Node<T> currentNode, HashSet<Node<T>> visitedNodes, Action<Node<T>> action, bool direct)
+        public void Foreach(Node<T> currentNode, bool direct, Action<Node<T>, Node<T>> action)
+        {
+            Foreach(currentNode, null, new HashSet<Node<T>>(), direct, action);
+        }
+        private void Foreach(Node<T> currentNode, Node<T> previousNode, HashSet<Node<T>> visitedNodes, bool direct, Action<Node<T>, Node<T>> action)
         {
             if (visitedNodes.Contains(currentNode))
             {
                 return;
             }
 
-            action.Invoke(currentNode);
+            action.Invoke(currentNode, previousNode);
 
             visitedNodes.Add(currentNode);
 
             foreach (Node<T> neighboor in currentNode.outNeighboors)
             {
-                GraphForeach(neighboor, visitedNodes, action, direct);
+                Foreach(neighboor, currentNode, visitedNodes, direct, action);
             }
             if(direct)
             {
@@ -51,7 +42,7 @@ namespace Graph
             }
             foreach (Node<T> neighboor in currentNode.inNeighboors)
             {
-                GraphForeach(neighboor, visitedNodes, action, direct);
+                Foreach(neighboor, currentNode, visitedNodes, direct, action);
             }
         }
 

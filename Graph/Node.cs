@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Graph
 {
-    public class Node<T> where T : IComparable
+    public class Node<T>
     {
         public T data;
         public List<Node<T>> inNeighboors = new List<Node<T>>();
