@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Graph
 {
-    struct Point
+    public struct Point
     {
         public int x, y;
 
@@ -39,6 +37,11 @@ namespace Graph
         public int EuclidianDistance(Point other)
         {
             return Math.Abs(other.x - this.x) + Math.Abs(other.y - this.y);
+        }
+
+        public override string ToString()
+        {
+            return $"({this.x},{this.y})";
         }
 
     }

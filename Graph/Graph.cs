@@ -12,40 +12,79 @@ namespace Graph
         {
             this.firstNode = node;
         }
+        #region DFS
 
-        public void Foreach(Action<Node<T>, Node<T>> action, bool direct)
+        public void DepthForeachSearch(Action<Node<T>, List<Node<T>>> action)
         {
-            Foreach(this.firstNode, direct, action);
+            DepthForeachSearch(this.firstNode, action);
         }
-        public void Foreach(Node<T> currentNode, bool direct, Action<Node<T>, Node<T>> action)
+        public void DepthForeachSearch(Node<T> currentNode, Action<Node<T>, List<Node<T>>> action)
         {
-            Foreach(currentNode, null, new HashSet<Node<T>>(), direct, action);
+            DepthForeachSearch(currentNode, new List<Node<T>>(), new HashSet<Node<T>>(), action);
         }
-        private void Foreach(Node<T> currentNode, Node<T> previousNode, HashSet<Node<T>> visitedNodes, bool direct, Action<Node<T>, Node<T>> action)
+        private void DepthForeachSearch(Node<T> currentNode, List<Node<T>> previousNodes, HashSet<Node<T>> visitedNodes, Action<Node<T>, List<Node<T>>> action)
         {
             if (visitedNodes.Contains(currentNode))
             {
                 return;
             }
 
-            action.Invoke(currentNode, previousNode);
-
             visitedNodes.Add(currentNode);
+
+            previousNodes.Add(currentNode);
+
+            action.Invoke(currentNode, previousNodes);
 
             foreach (Node<T> neighboor in currentNode.outNeighboors)
             {
-                Foreach(neighboor, currentNode, visitedNodes, direct, action);
-            }
-            if(direct)
-            {
-                return;
-            }
-            foreach (Node<T> neighboor in currentNode.inNeighboors)
-            {
-                Foreach(neighboor, currentNode, visitedNodes, direct, action);
+                DepthForeachSearch(neighboor, new List<Node<T>>(previousNodes), visitedNodes, action);
             }
         }
 
+        #endregion
+
+        #region BFS
+        public void BreadthForeachSearch(Action<Node<T>> action)
+        {
+            BreadthForeachSearch(this.firstNode, action);
+        }
+        public void BreadthForeachSearch(Node<T> firstNode, Action<Node<T>> action)
+        {
+            Queue<Node<T>> queue = new Queue<Node<T>>();
+            HashSet<Node<T>> visitedNodes = new HashSet<Node<T>>();
+
+            queue.Enqueue(firstNode);
+            visitedNodes.Add(firstNode);
+            action.Invoke(firstNode);
+
+            BreadthForeachSearch(firstNode, visitedNodes, queue, action);
+        }
+
+        private void BreadthForeachSearch(Node<T> previousNode, HashSet<Node<T>> visitedNodes, Queue<Node<T>> queue, Action<Node<T>> action)
+        {
+            if(queue.Count == 0)
+            {
+                return;
+            }
+
+            Node<T> currentNode = queue.Dequeue();
+
+            foreach (Node<T> neighboor in currentNode.outNeighboors)
+            {
+                if (visitedNodes.Contains(neighboor))
+                {
+                    continue;
+                }
+                neighboor.backtraceNodes.AddRange(previousNode.backtraceNodes);
+                neighboor.backtraceNodes.Add(previousNode);
+                visitedNodes.Add(neighboor);
+                action.Invoke(neighboor);
+                queue.Enqueue(neighboor);
+            }
+            BreadthForeachSearch(currentNode, visitedNodes, queue, action);
+           
+        }
+        #endregion
     }
 
 }
