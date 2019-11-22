@@ -22,35 +22,47 @@ namespace Dijkstra
 
             Dictionary<Node<T>, Node<T>> previousNodeLookup = new Dictionary<Node<T>, Node<T>>();
             allNodes.ForEach(node => previousNodeLookup.Add(node, null));
-            allNodes.Remove(source);
-            List<Node<T>> nodesQueue = new List<Node<T>>(allNodes);
-            while(nodesQueue.Count > 0)
+            List<Node<T>> nodes = new List<Node<T>>(allNodes);
+            while(nodes.Count > 0)
             {
-                (int cost, Node<T> node) min = nodesQueue.Select(node => (costsLookup[node], node)).Min();
-                nodesQueue.Remove(min.node);
-                Node<T> u = min.node;
-                foreach(Path<T> v in u.outNeighboors)
+                (int cost, Node<T> node) min = Min(nodes, costsLookup);
+                nodes.Remove(min.node);
+                Node<T> v = min.node;
+                foreach(Path<T> u in v.outNeighboors)
                 {
-                    if(visitedNodes.Contains(v.node))
+                    if(visitedNodes.Contains(u.node))
                     {
                         continue;
                     }
-                    visitedNodes.Add(v.node);
-                    int alt = costsLookup[u] + v.cost;
-                    if (alt < costsLookup[v.node])
+                    visitedNodes.Add(u.node);
+                    int alt = costsLookup[v] + u.cost;
+                    if (alt < costsLookup[u.node])
                     {
-                        costsLookup[v.node] = alt;
-                        previousNodeLookup[v.node] = u;
+                        costsLookup[u.node] = alt;
+                        previousNodeLookup[u.node] = v;
                     }
                 }
             }
             List<Node<T>> invertedPath = new List<Node<T>>();
-            for (Node<T> node = target; node != null; target = previousNodeLookup[target])
+            for (Node<T> node = target; node != null; node = previousNodeLookup[node])
             {
                 invertedPath.Add(node);
             }
             invertedPath.Reverse();
             return invertedPath;
+        }
+
+        private static (int cost, Node<T> node) Min<T>(List<Node<T>> nodes, Dictionary<Node<T>, int> costsLookup)
+        {
+            (int cost, Node<T> node) min = (costsLookup[nodes[0]], nodes[0]);
+            for (int i = 1; i < nodes.Count; i++)
+            {
+                if(costsLookup[nodes[i]] < min.cost)
+                {
+                    min = (costsLookup[nodes[i]], nodes[i]);
+                }
+            }
+            return min;
         }
 
         private static Dictionary<Node<T>, int> CreateCostsStructure<T>(Node<T> node, int infinity, List<Node<T>> allNodes)
